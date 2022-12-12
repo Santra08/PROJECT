@@ -36,3 +36,37 @@ class model:
         hist = model.fit(np.array(self.x_train), np.array(self.y_train), epochs=200, batch_size=5, verbose=1)
         model.save('chatbot_model.h6', hist)
         print("model created")
+        
+        
+ class gui_model:
+    def chatbot_response(self,text):
+        ints= self.predict_class(text, model)
+        res = self.getResponse(ints,intents)
+        return res
+    def predict_class(self, sentence, model):
+        words = pickle.load(open('words.pkl','rb'))
+        p=dp.c.bow(sentence, words,show_details=False)
+        model = load_model('chatbot_model.h6')
+        res = model.predict(np.array([p]))[0]
+        ERROR_THRESHOLD = 0.25
+        results = [[i,r] for i,r in enumerate(res) if r>ERROR_THRESHOLD]
+        results.sort(key=lambda x: x[1], reverse=True)
+        return_list = []
+        for r in results:
+            return_list.append({"intent": classes[r[0]], "probability": str(r[1])})
+        return return_list
+    def getResponse(self,ints,intents_json):
+        tag = ints[0]['intent']
+        list_of_intents = intents_json['intents']
+        for i in list_of_intents:
+            if(i['tag']== tag):
+                result = random.choice(i['responses'])
+                break
+        return result
+    
+m=model()
+m.model_creation()
+
+gui=gui_model()
+
+print("finished")
